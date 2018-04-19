@@ -1,0 +1,353 @@
+<!doctype HTML>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Jos Stam Fluid</title>
+  		<meta name="description" content="Jos Stam Fluid">
+        <meta name="viewport" content="width=device-width">
+        <link href='https://fonts.googleapis.com/css?family=Gloria+Hallelujah' rel='stylesheet' type='text/css'>
+        <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+  		<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+
+<style>
+body
+{
+	
+	
+	background-color: #87CEFA!important;
+	/*background-size: 1300px 800px;
+	background-repeat:no-repeat;*/
+	display: compact;
+/*
+	color: black;
+	font-family: 'Gloria Hallelujah', cursive;   
+*/
+}
+.btn-primary
+{
+	border-color: rgba(0,0,0,0);
+
+	color: white;
+
+}
+
+
+.jumbotron 
+{
+	position: absolute;
+	padding: 20px;
+	margin-top: 100px;
+
+	background: rgba(0, 0, 0, 0.5);
+
+}
+
+.top_margin
+{
+  margin-top:20px;
+}
+
+.red
+{
+	background-color: #DC143C!important;
+}
+
+.blue
+{
+	background-color: #1E90FF!important;
+}
+
+
+.green
+{
+	background-color: #32CD32!important;
+}
+
+.pink
+{
+	background-color: #FF1493!important;
+}
+.white
+{
+	background-color: #000000!important;
+}
+
+.vibgyor:hover
+{
+	color: rgba(0,0,0,0);
+}
+.vibgyor:active 
+{ 
+	color: rgba(0,0,0,0);
+}
+
+.vibgyor:focus
+{
+	color: rgba(0,0,0,0);
+}
+
+.cardinal
+{
+    background-image: url('cardinal.png') !important;
+	background-size: 100px 40px;
+	background-repeat: no-repeat;
+	color: rgba(0,0,0,0);
+	border-color: rgba(0,0,0,255);
+	font-size: 15px;
+	text-indent: -9999px; 
+}
+
+
+.skyblue
+{
+	background-color: #87CEFA!important;
+}
+
+.purple
+{
+	background-color: #a020f0!important;
+}
+
+.vibgyor
+{
+	background-image: url('rainbow.jpg') !important;
+	background-size: 100px 43px;
+	background-repeat: no-repeat;
+	color: rgba(0,0,0,0);
+}
+
+
+</style>
+</head>
+<body>
+        <script src="js/josstam.js"></script>
+        <script src="lib/stats.min.js"></script>
+        <script src="lib/dat.gui.min.js"></script>
+        
+        <script>
+            
+            var canvas;
+            var dimension = 512;
+            var origMouseX, origMouseY;
+            var mouseX, mouseY;
+            var mousePressed = false;
+            var simulating = false;
+            var prevTime;
+			var fps;
+			var pointX;
+			var pointY;
+			var width = 128;
+			var height = 128;
+			var frames = 0;
+			var actual_frames = 0;
+			var numTimesCalled;
+			var button_id;
+            var stats;
+			
+            onmouseup = function()
+			  {
+			  mousePressed = false;
+			  }
+			
+			window.onload=function()
+			{
+                canvas = document.getElementById("canvas");
+                fluid = new josStamFluid(canvas);
+                canvas.width = 512;
+                canvas.height = 512;
+                fluid.set_user_update(simulateFluid);
+                fluid.get_id(button_id);    
+                        
+                function topLeftCanvas(canvas) {
+					var canvasTop = 0;
+					var canvasLeft = 0;
+					var canvas = document.getElementById('canvas');
+					while( canvas && ( canvas != document.body ) )
+					{
+					canvasTop += canvas.offsetTop;
+					canvasLeft += canvas.offsetLeft;
+					canvas = canvas.offsetParent;
+					}
+                    
+                    return {left: canvasLeft, top: canvasTop};
+                }
+            
+                canvas.onmousedown = function(event) 
+                {
+                    var topLeft = topLeftCanvas(canvas);
+                    origMouseX = mouseX = event.clientX - topLeft.left;
+                    origMouseY = mouseY = event.clientY - topLeft.top;
+                    // LEFT MOUSE BUTTON CLICKED
+                    if (event.button == 0)
+                    {
+                        mousePressed = true;
+                    }
+                    
+                    event.preventDefault();
+                   
+                }
+                canvas.onmousemove = function(event)
+                 {
+                    var topLeft = topLeftCanvas(canvas);
+                    mouseX = event.clientX - topLeft.left;
+                    mouseY = event.clientY - topLeft.top;
+                }
+                fluid.update_disp(changeVisual(canvas));
+                
+                stats = new Stats();
+                stats.setMode(0);
+                stats.domElement.style.position = "absolute";
+                stats.domElement.style.left = "0px";
+                stats.domElement.style.top = "0px";
+                document.body.appendChild(stats.domElement);
+                
+                
+                
+            }
+			
+
+            function newFrame()
+            {
+                stats.begin();
+                fluid.update();
+                stats.end();
+                requestAnimationFrame(newFrame);
+                
+                /*change = (Date.now() - prevTime)/1000;
+                prevTime = Date.now();
+				
+				frames++;
+				actual_frames++;
+				fps = 1/change;
+				document.getElementById("fps").innerHTML = Math.floor(fps);
+                
+                if (simulating)
+                {
+                    numTimesCalled = setTimeout(newFrame, 10);
+                }*/
+
+            }
+            
+            requestAnimationFrame(newFrame);
+            
+            function stop() 
+            {
+                simulating = false;
+                clearTimeout(numTimesCalled);
+                frames=1;
+            }
+            function start(id)
+             {
+                if (!simulating)
+                {
+                
+                button_id= id;
+                //alert(button_id);
+                simulating=true;
+                numTimesCalled = setTimeout(newFrame, 10);
+                }
+            }
+            
+            
+            function simulateFluid(fluid)
+            {
+                var canvas = document.getElementById("canvas");
+                if ((origMouseX >= 0 && origMouseX < dimension && origMouseY >= 0 && origMouseY < dimension) && mousePressed) 
+                {
+                    var distX = mouseX - origMouseX;
+                    var distY = mouseY - origMouseY;
+                    var distance = (Math.sqrt(distX * distX + distY * distY));
+                   if(distance<1)
+                   {
+                   distance=1;
+                   
+                   }
+                    for (var i = 0; i < distance; i++)
+                    {
+                        pointX = (((origMouseX + distX * (i / distance)) / dimension) * width) | 0
+                        pointY = (((origMouseY + distY * (i / distance)) / dimension) * height) | 0;
+                        fluid.setVelocity(pointX, pointY, distX, distY);
+                        fluid.setDensity(pointX, pointY, 50);
+                    }
+                    origMouseX = mouseX;
+                    origMouseY = mouseY;
+                }
+                
+            }
+            
+            
+            
+            
+            
+        </script>
+
+    <div class="row" style="padding-top: 100px;">
+         <div class="col-md-6 col-md-offset-1">
+				<canvas id=canvas style="width: 512px; height: 512px;"></canvas>
+		 </div>
+                    <div class="col-xs-6 col-md-4">
+                    
+                    <div class="jumbotron" id="jumbotron">
+                    	<!--<div class="row top_margin">
+                    	<div class="col-xs-8 col-md-12">
+                    	<button type="button" class="btn btn-primary">FPS: <span class="badge" id = fps>0</span></button>
+                    	       
+                    	</div>
+                    	</div>-->
+                    <div class="row top_margin">
+                    	<div class="col-xs- col-md-4">
+                    		<button class="btn btn-primary btn-block red" id="red" onclick="start(this.id)">RED</button>
+                    	</div>
+                    	<div class="col-xs-4 col-md-4">
+                    		<button class="btn btn-primary btn-block blue" id="blue" onclick="start(this.id)">BLUE</button>
+                    	</div>
+                    	<div class="col-xs-4 col-md-4">
+                            <button class="btn btn-primary btn-block skyblue" id="skyblue" onclick="start(this.id)">WATER</button>
+                        </div>
+                        </div>
+                    <div class="row top_margin">
+                    	<div class="col-xs-4 col-md-4">
+                    		<button class="btn btn-primary btn-block green" id="green" onclick="start(this.id)">GREEN</button>
+                    	</div>
+                    	<div class="col-xs-4 col-md-4">
+                    		<button class="btn btn-primary btn-block purple" id="purple" onclick="start(this.id)">PURPLE</button>
+                    	</div>
+                    	<div class="col-xs-4 col-md-4">
+                            <button class="btn btn-default btn-block vibgyor" id="vibgyor" onclick="start(this.id)">RAINBOW</button>
+                        </div>
+                        </div>
+                        
+                    <div class="row top_margin">
+                    	<div class="col-xs-4 col-md-4">
+                    		<button class="btn btn-primary btn-block white" id="white" onclick="start(this.id)">SMOKE</button>
+                    	</div>
+                    	<div class="col-xs-4 col-md-4">
+                    		<button class="btn btn-primary btn-block cardinal" id="cardinal" onclick="start(this.id)">FIGHT ON</button>
+                    	</div>
+                    	<div class="col-xs-4 col-md-4">
+                            <button class="btn btn-primary btn-block pink" id="pink" onclick="start(this.id)">PINK</button>
+                        </div>
+                        </div>
+                    
+                     <div class="row top_margin">
+                    	<div class="col-xs-6 col-md-6">
+                    		<button class="btn btn-primary btn-block" onclick="stop()">STOP</button>
+                    	</div>
+                    	<div class="col-xs-6 col-md-6">
+                    		 <button class="btn btn-primary btn-block" id ="reset" onclick="fluid.clearCanvas();">RESET</button>
+                    	</div>
+                    	</div>
+                        </div>
+                    	
+                    
+
+                    
+                    
+                   
+                    </div>
+                    
+                
+                 </div>
+    </body>
+</html>
